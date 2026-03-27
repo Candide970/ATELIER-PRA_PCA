@@ -231,27 +231,29 @@ Faites preuve de pédagogie et soyez clair dans vos explications et procedures d
 **Exercice 1 :**  
 Quels sont les composants dont la perte entraîne une perte de données ?  
   
-*..Répondez à cet exercice ici..*
+Les composants dont la perte entraîne une perte de données sont : pra-data ,pra-backup
 
 **Exercice 2 :**  
 Expliquez nous pourquoi nous n'avons pas perdu les données lors de la supression du PVC pra-data  
   
-*..Répondez à cet exercice ici..*
+Nous n'avons pas perdu de données car le cycle de vie du stockage est découplé de celui du calcul
 
 **Exercice 3 :**  
 Quels sont les RTO et RPO de cette solution ?  
-  
+  RPO : 1 minute CronJob de sauvegarde s'exécute toutes les minutes (*/1 * * * *)
+  RTO : 2 à 5 minutes C'est le temps nécessaire à un humain pour détecter l'alerte, se connecter, et lancer manuellement la commande
 *..Répondez à cet exercice ici..*
 
 **Exercice 4 :**  
 Pourquoi cette solution (cet atelier) ne peux pas être utilisé dans un vrai environnement de production ? Que manque-t-il ?   
   
-*..Répondez à cet exercice ici..*
+
+Cette solution est inadaptée à la production car elle repose sur un stockage local sans redondance géographique, une base SQLite sensible à la corruption en cas de montée en charge, et une procédure de restauration manuelle dépourvue d'alerting.
   
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-*..Répondez à cet exercice ici..*
+Pour une production robuste, il faut passer d'un stockage local à une architecture distribuée et managée : remplacer SQLite par un cluster de base de données type PostgreSQL , externaliser les sauvegardes sur un stockage objet distant , et répartir les ressources sur plusieurs zones de disponibilité.
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
@@ -265,11 +267,27 @@ Difficulté : Moyenne (~2 heures)
 
 *..**Déposez ici une copie d'écran** de votre réussite..*
 
+!![Succès Atelier 1](Capture%20d'écran%202026-03-27%20115528.png)
 ---------------------------------------------------
 ### **Atelier 2 : Choisir notre point de restauration**  
 Aujourd’hui nous restaurobs “le dernier backup”. Nous souhaitons **ajouter la capacité de choisir un point de restauration**.
 
 *..Décrir ici votre procédure de restauration (votre runbook)..*  
+
+Étape 1 : Choisir la sauvegarde
+Lister les fichiers disponibles pour trouver le point de restauration souhaité :
+kubectl -n pra exec -it deployment/flask -- ls /backup
+(Note : Choisir un fichier comme app-1774609861.db)
+
+Étape 2 : Lancer la restauration
+Modifier le fichier pra/50-job-restore.yaml avec le nom du fichier choisi, puis exécuter :
+
+kubectl -n pra delete job restore-db --ignore-not-found (Nettoyage)
+
+kubectl apply -f pra/50-job-restore.yaml (Restauration)
+
+Étape 3 : Vérification
+Vérifier que le job est terminé (Status: Completed) et que les données sont revenues sur l'application (/status ou /consultation).
   
 ---------------------------------------------------
 Evaluation
