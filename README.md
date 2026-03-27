@@ -253,7 +253,11 @@ Cette solution est inadaptée à la production car elle repose sur un stockage l
 **Exercice 5 :**  
 Proposez une archtecture plus robuste.   
   
-Pour une production robuste, il faut passer d'un stockage local à une architecture distribuée et managée : remplacer SQLite par un cluster de base de données type PostgreSQL , externaliser les sauvegardes sur un stockage objet distant , et répartir les ressources sur plusieurs zones de disponibilité.
+Pour une production robuste, il est nécessaire de passer d’un stockage local à une architecture distribuée et résiliente.
+Cela implique de remplacer SQLite par une base de données PostgreSQL déployée en cluster avec réplication et mécanisme de failover automatique afin d’assurer la haute disponibilité.
+Les sauvegardes doivent être externalisées vers un stockage objet distant (type S3) pour garantir la durabilité des données même en cas de perte totale du cluster.
+Enfin, l’infrastructure doit être répartie sur plusieurs zones de disponibilité afin d’assurer la continuité de service.
+Cette architecture repose sur une séparation claire entre application stateless, stockage persistant distribué et sauvegardes externalisées, permettant de répondre efficacement aux exigences de PCA et de PRA.
 
 ---------------------------------------------------
 Séquence 6 : Ateliers  
